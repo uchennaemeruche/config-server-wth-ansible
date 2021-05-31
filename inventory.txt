@@ -1,2 +1,2 @@
 [all]
-3.138.151.252 
+ec2-3-138-151-252.us-east-2.compute.amazonaws.com
