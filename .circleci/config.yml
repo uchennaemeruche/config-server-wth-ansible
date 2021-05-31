@@ -6,7 +6,7 @@ jobs:
     steps:
       - checkout
       - add_ssh_keys:
-          fingerprints: ["e5:e5:b2:be:96:04:a5:43:8a:e0:a5:0a:81:ae:82:f3"] # You can get this ID in the section where you registered the SSH Key
+          fingerprints: ["34:5d:61:5e:48:c5:3a:b5:f3:87:c9:4f:46:19:13:99"] # You can get this ID in the section where you registered the SSH Key
       - run:
           name: Install dependencies
           command: |
