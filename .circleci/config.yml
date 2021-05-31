@@ -15,7 +15,6 @@ jobs:
           name: Configure server
           command: |
             ansible-playbook -i inventory.txt playbook.yml
-
   smoke_test:
     docker:
       image: alpine:latest
@@ -26,8 +25,9 @@ jobs:
         name: Smoke Test
         command: |
           URL="https://mekiotechdigital.com/"
-          if curl -s --head ${URL}
-            then return 0
+          if curl -s --head ${URL} # test if blog.udacity. com exists
+          then
+            return 0
           else
             return 1
           fi
