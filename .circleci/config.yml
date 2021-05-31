@@ -6,7 +6,7 @@ jobs:
     steps:
       - checkout
       - add_ssh_keys:
-          fingerprints: ["28:8d:a0:62:f7:a0:f1:17:bb:68:e7:f2:6a:77:31:b5"] # You can get this ID in the section where you registered the SSH Key
+          fingerprints: ["e5:e5:b2:be:96:04:a5:43:8a:e0:a5:0a:81:ae:82:f3"] # You can get this ID in the section where you registered the SSH Key
       - run:
           name: Install dependencies
           command: |
@@ -15,8 +15,28 @@ jobs:
           name: Configure server
           command: |
             ansible-playbook -i inventory.txt playbook.yml
+
+  smoke_test:
+    docker:
+      image: alpine:latest
+    steps:
+      - checkout
+      - run: apk add --update curl
+      - run:
+        name: Smoke Test
+        command: |
+          URL="https://mekiotechdigital.com/"
+          if curl -s --head ${URL}
+            then return 0
+          else
+            return 1
+          fi
+
 workflows:
   new_deployment_workflow:
     jobs:
       - configure_infrastructure
+      - smoke_test:
+          requires:
+            - configure_infrastructure
 
