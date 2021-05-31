@@ -17,20 +17,20 @@ jobs:
             ansible-playbook -i inventory.txt playbook.yml
   smoke_test:
     docker:
-      image: alpine:latest
+      - image: alpine:latest
     steps:
       - checkout
       - run: apk add --update curl
       - run:
-        name: Smoke Test
-        command: |
-          URL="https://mekiotechdigital.com/"
-          if curl -s --head ${URL} # test if blog.udacity. com exists
-          then
-            return 0
-          else
-            return 1
-          fi
+          name: Smoke Test
+          command: |
+            URL="https://mekiotechdigital.com/"
+            if curl -s --head ${URL} # test if blog.udacity. com exists
+            then
+              return 0
+            else
+              return 1
+            fi
 
 workflows:
   new_deployment_workflow:
