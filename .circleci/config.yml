@@ -1,24 +1,26 @@
 version: 2.1
 jobs:
-  configure_infrastructure:
-    docker:
+  write_to_file:
+    docker: 
       - image: python:3.7-alpine3.11
     steps:
-      - checkout
-      - add_ssh_keys:
-          fingerprints: ["34:5d:61:5e:48:c5:3a:b5:f3:87:c9:4f:46:19:13:99"] # You can get this ID in the section where you registered the SSH Key
-      - run:
-          name: Install dependencies
-          command: |
-            apk add --update ansible # install the dependencies needed for your playbook
-      # - run:
-      #     name: update known hosts
-      #     command: |
-      #       ssh-keyscan -H ec2-3-138-151-252.us-east-2.compute.amazonaws.com >> ~/.ssh/known_hosts
-      - run:
-          name: Configure server
-          command: |
-            ansible-playbook -i inventory.txt playbook.yml
+      - run: echo "Hi there" > pyth.txt
+
+  # configure_infrastructure:
+  #   docker:
+  #     - image: python:3.7-alpine3.11
+  #   steps:
+  #     - checkout
+  #     - add_ssh_keys:
+  #         fingerprints: ["34:5d:61:5e:48:c5:3a:b5:f3:87:c9:4f:46:19:13:99"] # You can get this ID in the section where you registered the SSH Key
+  #     - run:
+  #         name: Install dependencies
+  #         command: |
+  #           apk add --update ansible # install the dependencies needed for your playbook
+  #     - run:
+  #         name: Configure server
+  #         command: |
+  #           ansible-playbook -i inventory.txt playbook.yml
   smoke_test:
     docker:
       - image: alpine:latest
@@ -39,8 +41,9 @@ jobs:
 workflows:
   new_deployment_workflow:
     jobs:
-      - configure_infrastructure
-      - smoke_test:
-          requires:
-            - configure_infrastructure
+      # - configure_infrastructure
+      - write_to_file
+      - smoke_test
+          # requires:
+          #   - configure_infrastructure
 
