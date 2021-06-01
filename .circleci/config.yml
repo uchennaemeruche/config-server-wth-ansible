@@ -13,7 +13,8 @@ jobs:
             apk add --update ansible # install the dependencies needed for your playbook
       - run:
           name: update known hosts
-          command: ssh-keyscan -H ec2-3-138-151-252.us-east-2.compute.amazonaws.com >> ~/.ssh/known_hosts
+          command: |
+            ssh-keyscan -H ec2-3-138-151-252.us-east-2.compute.amazonaws.com >> ~/.ssh/known_hosts
       - run:
           name: Configure server
           command: |
