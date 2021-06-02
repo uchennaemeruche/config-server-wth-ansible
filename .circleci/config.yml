@@ -44,6 +44,7 @@ jobs:
             fi
 
 workflows:
+  version: 2
   new_deployment_workflow:
     jobs:
       # - configure_infrastructure
