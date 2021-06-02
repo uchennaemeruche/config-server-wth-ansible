@@ -10,6 +10,7 @@ jobs:
             set +e
             mkdir -p /checkers
             make test
+      - run: cp ./inventory.txt invent.txt
   
   # configure_infrastructure:
   #   docker:
