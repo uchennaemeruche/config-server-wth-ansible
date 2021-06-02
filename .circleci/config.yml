@@ -7,7 +7,7 @@ jobs:
       - run: 
           name:  setup and echo to a file
           command: |
-            echo "export __BUILD_VERSION=\"$(cat version.txt)\"" >> $BASH_ENV
+            echo "export __BUILD_VERSION=\"$(cat inventory.txt)\"" >> $BASH_ENV
 
   # configure_infrastructure:
   #   docker:
