@@ -15,7 +15,7 @@ jobs:
   build-windows:
     machine:
       image: windows-server-2019-vs2019:stable
-      # shell: powershell.exe
+      shell: powershell.exe
     resource_class: windows.medium
     parameters:
       label:
