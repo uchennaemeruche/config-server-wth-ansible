@@ -1,13 +1,89 @@
 version: 2.1
+orbs:
+  github-release: haskell-works/github-release@1.3.3
+parameters:
+  src-repo-url:
+    type: string
+    default: https://github.com/esnet/iperf.git
+  branch-name:
+    type: string
+    default: "3.8.1"
+  common-build-params:
+    type: string
+    default: "--disable-shared --disable-static"
 jobs:
-  write_to_file:
-    docker: 
-      - image: alpine:latest
+  build-windows:
+    machine:
+      image: windows-server-2019-vs2019:stable
+      shell: powershell.exe
+    resource_class: windows.medium
+    parameters:
+      label:
+        type: string
+        default: iperf3-cygwin64
     steps:
-      - run: 
-          name:  setup and echo to a file
+      - run:
+          name: Download Cygwin installer
+          shell: bash.exe
           command: |
-            echo "export __BUILD_VERSION=\"$(cat inventory.txt)\"" >> $BASH_ENV
+            curl -sSJOL https://cygwin.com/setup-x86_64.exe
+      - run:
+          name: Install Cygwin and required packages
+          command: .\setup-x86_64.exe -q -s https://mirrors.kernel.org/sourceware/cygwin/ -P libssl-devel,git,gcc-core,make
+      - run:
+          name: Build iperf3 with Cygwin
+          shell: C:\\cygwin64\\bin\\bash.exe --login -eo pipefail
+          command: |
+            CIRCLE_WORKING_DIRECTORY=$(eval "echo $CIRCLE_WORKING_DIRECTORY")
+            IPERF3_MAKE_PREFIX=$CIRCLE_WORKING_DIRECTORY/<< parameters.label >>
+            cd $CIRCLE_WORKING_DIRECTORY
+            git clone << pipeline.parameters.src-repo-url >> -b << pipeline.parameters.branch-name >>
+            cd iperf
+            ./configure --prefix=$IPERF3_MAKE_PREFIX << pipeline.parameters.common-build-params >>
+            make
+            mkdir -p $IPERF3_MAKE_PREFIX
+            make install
+            cp /usr/bin/cygwin1.dll /usr/bin/cygcrypto-1.1.dll /usr/bin/cygz.dll -t $IPERF3_MAKE_PREFIX/bin
+      - run:
+          name: Create a Zip file
+          command: |
+            $ProgressPreference = "SilentlyContinue"
+            Compress-Archive .\\<< parameters.label >> .\\<< parameters.label >>.zip
+      - persist_to_workspace:
+          root: .
+          paths:
+            - << parameters.label >>.zip
+      - store_artifacts:
+          path: << parameters.label >>.zip
+
+  test-windows:
+    machine:
+      image: windows-server-2019-vs2019:stable
+      shell: powershell.exe
+    resource_class: windows.medium
+    parameters:
+      label:
+        type: string
+        default: iperf3-cygwin64
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Extract iperf3-cygwin64.zip
+          command: |
+            $ProgressPreference = "SilentlyContinue"
+            Expand-Archive .\\<< parameters.label >>.zip .
+      - run:
+          name: Test executable
+          command: .\\<< parameters.label >>\bin\iperf3.exe -v
+      - run:
+          name: Run as a server
+          command: .\\<< parameters.label >>\bin\iperf3.exe -s
+          background: true
+      - run:
+          name: Run as a client
+          command: .\\<< parameters.label >>\bin\iperf3.exe -c localhost -R
+
 
   # configure_infrastructure:
   #   docker:
@@ -44,8 +120,12 @@ jobs:
 workflows:
   new_deployment_workflow:
     jobs:
+      - build-windows
+      - test-windows:
+          requires:
+            build-windows
       # - configure_infrastructure
-      - write_to_file
+      # - write_to_file
       # - smoke_test
           # requires:
           #   - configure_infrastructure
