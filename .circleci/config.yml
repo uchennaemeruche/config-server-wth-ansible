@@ -2,9 +2,12 @@ version: 2.1
 jobs:
   write_to_file:
     docker: 
-      - image: python:3.7-alpine3.11
+      - image: alpine:latest
     steps:
-      - run: echo "Hi there" > pyth.txt
+      - run: 
+          name:  setup and echo to a file
+          command: |
+            echo "export __BUILD_VERSION=\"$(cat version.txt)\"" >> $BASH_ENV
 
   # configure_infrastructure:
   #   docker:
@@ -43,7 +46,7 @@ workflows:
     jobs:
       # - configure_infrastructure
       - write_to_file
-      - smoke_test
+      # - smoke_test
           # requires:
           #   - configure_infrastructure
 
